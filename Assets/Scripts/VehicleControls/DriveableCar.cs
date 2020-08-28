@@ -1,12 +1,22 @@
 ﻿using UnityEngine;
 using TMPro;
-using System.Collections;
-using UnityEditor;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class DriveableCar : MonoBehaviour {
 
 	VehicleInput inputActions;
+	WheelCollider[] wheels;
+	VolumeProfile postProcessing;
+	Rigidbody rb;
+	AudioSource audioSource;
+	//HUD
+	TextMeshProUGUI currentSpeedText;
+	Slider speedometer;
+	TextMeshProUGUI gearText;
+	Slider gasMeter;
+
+	[Header("Drive")]
 	public bool LargeWheels;
 	public bool fourWheelDrive = false;
 	public GameObject wheelGraphic;
@@ -15,21 +25,19 @@ public class DriveableCar : MonoBehaviour {
 	public float maxTorque = 2000;
 	public float brakeTorque = 8000;
 
-	WheelCollider[] wheels;
+	[Header("Collisions")]
+	public AudioClip[] highSpeedCrash;
+	public AudioClip[] lowSpeedCrash;
+	public float crashVelocityLow = 25f;
+
 	float torque, angle = 0;
+	float speed = 0;
 	bool grounded;
+	bool braking;
 	[HideInInspector]
-	public bool braking;
-
-	//HUD
-	TextMeshProUGUI currentSpeedText;
-	Slider speedometer;
-	TextMeshProUGUI gearText;
-	Slider gasMeter;
-
+	public bool boosting;
 	[HideInInspector]
-	public float speed = 0;
-	Rigidbody rb;
+	public bool skidding;
 
 	private void Awake()
 	{
@@ -37,11 +45,17 @@ public class DriveableCar : MonoBehaviour {
 		inputActions.Enable();
 		inputActions.Move.Brake.started += ctx => braking = true;
 		inputActions.Move.Brake.canceled += ctx => braking = false;
+		inputActions.Move.Boost.started += ctx => boosting = true;
+		inputActions.Move.Boost.canceled += ctx => boosting = false;
+
 		currentSpeedText = GameObject.Find("SpeedTxt").GetComponent<TextMeshProUGUI>();
 		speedometer = GameObject.Find("Speedometer").GetComponent<Slider>();
 		gearText = GameObject.Find("GearTxt").GetComponent<TextMeshProUGUI>();
 		gasMeter = GameObject.Find("GasMeter").GetComponent<Slider>();
 		rb = GetComponent<Rigidbody>();
+		audioSource = GetComponent<AudioSource>();
+
+		postProcessing = GameObject.Find("PostProcessor").GetComponent<Volume>().profile;
 	}
 
 	private void OnDisable()
@@ -70,15 +84,23 @@ public class DriveableCar : MonoBehaviour {
 		
 	}
 
-	// this is a really simple approach to updating wheels
-	// here we simulate a rear wheel drive car and assume that the car is perfectly symmetric at local zero
-	// this helps us to figure our which wheels are front ones and which are rear
 	public void Update()
 	{
 
 		//steer values
 		torque = maxTorque * inputActions.Move.Drive.ReadValue<float>();
 		angle = maxAngle * inputActions.Move.Steering.ReadValue<float>();
+
+		if (boosting) {
+			postProcessing.components[5].active = true;
+			postProcessing.components[7].active = true;
+			Boost();
+		}
+		else
+		{
+			postProcessing.components[5].active = false;
+			postProcessing.components[7].active = false;
+		}
 
 		//wheel movement
 		foreach (WheelCollider wheel in wheels) {
@@ -93,12 +115,13 @@ public class DriveableCar : MonoBehaviour {
 			else
 			{
 				wheel.brakeTorque = 0;
+				wheel.motorTorque = torque;
 			}
 
 			if (wheel.transform.localPosition.z > 0)
 			{//front wheels
 				wheel.steerAngle = angle;
-				wheel.motorTorque = torque;
+				//wheel.motorTorque = torque;
 			}
 			else
 			{
@@ -142,11 +165,29 @@ public class DriveableCar : MonoBehaviour {
 		{
 			WheelHit wheelHit;
 			wheel.GetGroundHit(out wheelHit);
-
-			if (Mathf.Abs(wheelHit.sidewaysSlip) >= 0.6f)
-				Debug.Log("skidding");
+			skidding = (Mathf.Abs(wheelHit.sidewaysSlip) >= 0.5f)? true: false;
 		}
 
+	}
+
+	public void Boost()
+	{
+		rb.AddRelativeForce (new Vector3(0, 0, 200), ForceMode.Impulse);
+		//instantiate boost effect
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		//low vel crash
+		if (collision.relativeVelocity.magnitude > 5 && collision.relativeVelocity.magnitude < crashVelocityLow) //20
+		{
+			audioSource.PlayOneShot(lowSpeedCrash[Random.Range(0, lowSpeedCrash.Length)]);
+		}
+		else if (collision.relativeVelocity.magnitude >= crashVelocityLow) //high vel crash
+		{
+			audioSource.PlayOneShot(highSpeedCrash[Random.Range(0, highSpeedCrash.Length)]);
+		}
+		
 	}
 
 }

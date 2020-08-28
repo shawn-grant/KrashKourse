@@ -8,7 +8,8 @@ public class PlayerEngineSounds : MonoBehaviour
     public AudioSource engineIdle;
     public AudioSource accelerate;
     public AudioSource deccelerate;
-    public AudioSource skiding;
+    public AudioSource skidding;
+    public AudioSource boosting;
 
     VehicleInput inputs;
     DriveableCar player;
@@ -40,10 +41,7 @@ public class PlayerEngineSounds : MonoBehaviour
 
         accelerate.volume = Mathf.Lerp(accelerate.volume, acceleration, 0.05f);
 
-        if (player.speed > 50 && player.braking)
-            skiding.volume = 1;
-        else skiding.volume = 0;
-
-            
+        skidding.volume = (player.skidding)? 1: 0;
+        boosting.volume = (player.boosting) ? Mathf.Lerp(boosting.volume, 1, 0.05f) : Mathf.Lerp(boosting.volume, 0, 0.05f);
     }
 }

@@ -286,8 +286,8 @@ public class @VehicleInput : IInputActionCollection, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""e9c037f5-f1a4-41fe-877b-a1e97d7fda34"",
-                    ""path"": ""<Keyboard>/space"",
-                    ""interactions"": ""MultiTap"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Boost"",
@@ -320,6 +320,14 @@ public class @VehicleInput : IInputActionCollection, IDisposable
                     ""name"": ""Special"",
                     ""type"": ""Button"",
                     ""id"": ""9e2f0e52-bdd7-4aee-b53c-41cd6f70614a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""ToggleAim"",
+                    ""type"": ""Button"",
+                    ""id"": ""7413c2d4-88ad-42da-904f-278ff04aecf9"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
@@ -413,6 +421,28 @@ public class @VehicleInput : IInputActionCollection, IDisposable
                     ""action"": ""Special"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c6bc1e0a-8486-4fc4-8663-0230b49d6c20"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleAim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2bb8e6e9-e378-496f-8204-2d21377d71c4"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleAim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -430,6 +460,7 @@ public class @VehicleInput : IInputActionCollection, IDisposable
         m_Attack_ShootPrimary = m_Attack.FindAction("ShootPrimary", throwIfNotFound: true);
         m_Attack_ShootSecondary = m_Attack.FindAction("ShootSecondary", throwIfNotFound: true);
         m_Attack_Special = m_Attack.FindAction("Special", throwIfNotFound: true);
+        m_Attack_ToggleAim = m_Attack.FindAction("ToggleAim", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -539,6 +570,7 @@ public class @VehicleInput : IInputActionCollection, IDisposable
     private readonly InputAction m_Attack_ShootPrimary;
     private readonly InputAction m_Attack_ShootSecondary;
     private readonly InputAction m_Attack_Special;
+    private readonly InputAction m_Attack_ToggleAim;
     public struct AttackActions
     {
         private @VehicleInput m_Wrapper;
@@ -546,6 +578,7 @@ public class @VehicleInput : IInputActionCollection, IDisposable
         public InputAction @ShootPrimary => m_Wrapper.m_Attack_ShootPrimary;
         public InputAction @ShootSecondary => m_Wrapper.m_Attack_ShootSecondary;
         public InputAction @Special => m_Wrapper.m_Attack_Special;
+        public InputAction @ToggleAim => m_Wrapper.m_Attack_ToggleAim;
         public InputActionMap Get() { return m_Wrapper.m_Attack; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -564,6 +597,9 @@ public class @VehicleInput : IInputActionCollection, IDisposable
                 @Special.started -= m_Wrapper.m_AttackActionsCallbackInterface.OnSpecial;
                 @Special.performed -= m_Wrapper.m_AttackActionsCallbackInterface.OnSpecial;
                 @Special.canceled -= m_Wrapper.m_AttackActionsCallbackInterface.OnSpecial;
+                @ToggleAim.started -= m_Wrapper.m_AttackActionsCallbackInterface.OnToggleAim;
+                @ToggleAim.performed -= m_Wrapper.m_AttackActionsCallbackInterface.OnToggleAim;
+                @ToggleAim.canceled -= m_Wrapper.m_AttackActionsCallbackInterface.OnToggleAim;
             }
             m_Wrapper.m_AttackActionsCallbackInterface = instance;
             if (instance != null)
@@ -577,6 +613,9 @@ public class @VehicleInput : IInputActionCollection, IDisposable
                 @Special.started += instance.OnSpecial;
                 @Special.performed += instance.OnSpecial;
                 @Special.canceled += instance.OnSpecial;
+                @ToggleAim.started += instance.OnToggleAim;
+                @ToggleAim.performed += instance.OnToggleAim;
+                @ToggleAim.canceled += instance.OnToggleAim;
             }
         }
     }
@@ -593,5 +632,6 @@ public class @VehicleInput : IInputActionCollection, IDisposable
         void OnShootPrimary(InputAction.CallbackContext context);
         void OnShootSecondary(InputAction.CallbackContext context);
         void OnSpecial(InputAction.CallbackContext context);
+        void OnToggleAim(InputAction.CallbackContext context);
     }
 }

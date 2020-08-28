@@ -273,8 +273,8 @@
                 {
                     "name": "",
                     "id": "e9c037f5-f1a4-41fe-877b-a1e97d7fda34",
-                    "path": "<Keyboard>/space",
-                    "interactions": "MultiTap",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Boost",
@@ -307,6 +307,14 @@
                     "name": "Special",
                     "type": "Button",
                     "id": "9e2f0e52-bdd7-4aee-b53c-41cd6f70614a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "ToggleAim",
+                    "type": "Button",
+                    "id": "7413c2d4-88ad-42da-904f-278ff04aecf9",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -398,6 +406,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Special",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c6bc1e0a-8486-4fc4-8663-0230b49d6c20",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleAim",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2bb8e6e9-e378-496f-8204-2d21377d71c4",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleAim",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
