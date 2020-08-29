@@ -24,6 +24,7 @@ public class DriveableCar : MonoBehaviour {
 	public float maxAngle = 45;
 	public float maxTorque = 2000;
 	public float brakeTorque = 8000;
+	public float maxSpeed = 200;
 
 	[Header("Collisions")]
 	public AudioClip[] highSpeedCrash;
@@ -81,12 +82,12 @@ public class DriveableCar : MonoBehaviour {
 		
 		if(transform.Find("COM"))
 			GetComponent<Rigidbody>().centerOfMass = transform.Find("COM").localPosition;
-		
+
+		speedometer.maxValue = maxSpeed;
 	}
 
 	public void Update()
 	{
-
 		//steer values
 		torque = maxTorque * inputActions.Move.Drive.ReadValue<float>();
 		angle = maxAngle * inputActions.Move.Steering.ReadValue<float>();
@@ -102,7 +103,7 @@ public class DriveableCar : MonoBehaviour {
 			postProcessing.components[7].active = false;
 		}
 
-		//wheel movement
+		//wheel controls
 		foreach (WheelCollider wheel in wheels) {
 			// a simple car where front wheels steer while rear ones drive
 
@@ -129,15 +130,13 @@ public class DriveableCar : MonoBehaviour {
 				if(fourWheelDrive)
 					wheel.steerAngle = -angle;
 			}
-
-			Quaternion q;
-			Vector3 p;
-			wheel.GetWorldPose(out p, out q);
-
-			// assume that the only child of the wheelcollider is the wheel shape
-			wheel.transform.GetChild(0).position = p;
-			wheel.transform.GetChild(0).rotation = q;
 		}
+	}
+
+	private void FixedUpdate()
+	{
+		///LIMIT VELOCITY
+		rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
 	}
 
 	private void LateUpdate()
@@ -146,13 +145,16 @@ public class DriveableCar : MonoBehaviour {
 		RaycastHit hit;
 		grounded = (Physics.Raycast(ray, out hit, 3f)) ? true : false;
 
+		///SPEED DISPLAY
 		speed = Mathf.Round(rb.velocity.magnitude * 3.6f);
 		speedometer.value = speed;
 		currentSpeedText.text = speed + "\nkm/h";
 
+		///GAS METER DISPLAY
 		float fwd = inputActions.Move.Drive.ReadValue<float>();
 		gasMeter.value = fwd;
 
+		///DRIVE GEAR DISPLAY
 		if (fwd == 0)
 			gearText.text = "N";
 		else if (fwd > 0)
@@ -160,14 +162,20 @@ public class DriveableCar : MonoBehaviour {
 		else
 			gearText.text = "R";
 
-		//Skidding
 		foreach (WheelCollider wheel in wheels)
 		{
+			///SKIDDING
 			WheelHit wheelHit;
 			wheel.GetGroundHit(out wheelHit);
 			skidding = (Mathf.Abs(wheelHit.sidewaysSlip) >= 0.5f)? true: false;
-		}
 
+			///WHEEL VISUALS
+			Quaternion q;
+			Vector3 p;
+			wheel.GetWorldPose(out p, out q);
+			wheel.transform.GetChild(0).position = p; //only child of the wheelcollider is the wheel shape
+			wheel.transform.GetChild(0).rotation = q;
+		}
 	}
 
 	public void Boost()

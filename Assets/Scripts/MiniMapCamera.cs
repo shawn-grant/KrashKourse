@@ -15,7 +15,7 @@ public class MiniMapCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = new Vector3(player.position.x, 610, player.position.z);
+        transform.position = new Vector3(player.position.x, 610, player.position.z + 100);
         transform.rotation = Quaternion.Euler(90, player.rotation.eulerAngles.y, 0);
     }
 }
