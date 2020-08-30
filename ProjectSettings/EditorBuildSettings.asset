@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/QuickRace.unity
     guid: ad232282d91ed7f4aa340945c0459f39
+  - enabled: 1
+    path: Assets/Scenes/PlayTests.unity
+    guid: a948628efa46ce14bb1c8ed11fe7df0a
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: ebeaecf272655e64a923733e53674c96,
       type: 2}
