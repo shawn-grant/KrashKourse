@@ -57,6 +57,10 @@ public class DriveableCar : MonoBehaviour {
 		audioSource = GetComponent<AudioSource>();
 
 		postProcessing = GameObject.Find("PostProcessor").GetComponent<Volume>().profile;
+		GameObject.FindGameObjectWithTag("CM Main Camera").
+			GetComponent<Cinemachine.CinemachineFreeLook>().m_Follow = transform;
+		GameObject.FindGameObjectWithTag("CM Main Camera").
+			GetComponent<Cinemachine.CinemachineFreeLook>().m_LookAt = transform;
 	}
 
 	private void OnDisable()
@@ -91,6 +95,9 @@ public class DriveableCar : MonoBehaviour {
 		//steer values
 		torque = maxTorque * inputActions.Move.Drive.ReadValue<float>();
 		angle = maxAngle * inputActions.Move.Steering.ReadValue<float>();
+
+		if (rb.velocity.magnitude >= (maxSpeed - 5))
+			torque = 0;
 
 		if (boosting) {
 			postProcessing.components[5].active = true;
@@ -131,12 +138,6 @@ public class DriveableCar : MonoBehaviour {
 					wheel.steerAngle = -angle;
 			}
 		}
-	}
-
-	private void FixedUpdate()
-	{
-		///LIMIT VELOCITY
-		rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
 	}
 
 	private void LateUpdate()
