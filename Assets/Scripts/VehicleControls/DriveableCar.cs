@@ -10,6 +10,8 @@ public class DriveableCar : MonoBehaviour {
 	VolumeProfile postProcessing;
 	Rigidbody rb;
 	AudioSource audioSource;
+	WheelFrictionCurve friction;
+	GameObject boostEffect;
 	//HUD
 	TextMeshProUGUI currentSpeedText;
 	Slider speedometer;
@@ -55,6 +57,7 @@ public class DriveableCar : MonoBehaviour {
 		gasMeter = GameObject.Find("GasMeter").GetComponent<Slider>();
 		rb = GetComponent<Rigidbody>();
 		audioSource = GetComponent<AudioSource>();
+		boostEffect = Camera.main.transform.GetChild(0).gameObject;
 
 		postProcessing = GameObject.Find("PostProcessor").GetComponent<Volume>().profile;
 		GameObject.FindGameObjectWithTag("CM Main Camera").
@@ -72,18 +75,14 @@ public class DriveableCar : MonoBehaviour {
 	void Start()
 	{
 		wheels = transform.GetComponentsInChildren<WheelCollider>();
+		friction = wheels[0].sidewaysFriction;
+
 		foreach (WheelCollider wheel in wheels)
 		{
-			//wheel.gameObject.GetComponent<Renderer>().enabled = false;
 			Transform a = Instantiate(wheelGraphic).transform;
 			a.SetParent(wheel.transform);
-
-			if (LargeWheels)
-				a.localScale *= 1.5f;
-			else
-				a.localScale *= 1f;
 		}
-		
+
 		if(transform.Find("COM"))
 			GetComponent<Rigidbody>().centerOfMass = transform.Find("COM").localPosition;
 
@@ -102,13 +101,21 @@ public class DriveableCar : MonoBehaviour {
 		if (boosting) {
 			postProcessing.components[5].active = true;
 			postProcessing.components[7].active = true;
+			boostEffect.SetActive(true);
 			Boost();
 		}
 		else
 		{
 			postProcessing.components[5].active = false;
 			postProcessing.components[7].active = false;
+			boostEffect.SetActive(false);
 		}
+
+		if (!grounded)
+			transform.Rotate(
+				Input.GetAxis("Vertical"),
+				inputActions.Move.Steering.ReadValue<float>(),
+				0, Space.Self);
 
 		//wheel controls
 		foreach (WheelCollider wheel in wheels) {
@@ -168,7 +175,11 @@ public class DriveableCar : MonoBehaviour {
 			///SKIDDING
 			WheelHit wheelHit;
 			wheel.GetGroundHit(out wheelHit);
-			skidding = (Mathf.Abs(wheelHit.sidewaysSlip) >= 0.5f)? true: false;
+			skidding = (Mathf.Abs(wheelHit.sidewaysSlip) >= 0.4f)? true: false;
+
+			///HANDLING
+			friction.stiffness = (speed >= 160)? 4: 1;
+			wheel.sidewaysFriction = friction;
 
 			///WHEEL VISUALS
 			Quaternion q;

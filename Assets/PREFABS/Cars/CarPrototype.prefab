@@ -1347,10 +1347,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LargeWheels: 0
   fourWheelDrive: 0
-  wheelGraphic: {fileID: 0}
+  wheelGraphic: {fileID: 171552542076851944, guid: 8f0fd38bbc6aa204888f12c192a2ee3b,
+    type: 3}
   maxAngle: 30
   maxTorque: 1000
-  brakeTorque: 4000
+  brakeTorque: 8000
   maxSpeed: 200
   highSpeedCrash:
   - {fileID: 8300000, guid: f98bd072cd622c34883ebaabdaf62c35, type: 3}
